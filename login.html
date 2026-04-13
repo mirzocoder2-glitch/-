@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Даромад — CodeAcademy TJ</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+body{display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:hidden;}
+body::before{content:'';position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(79,142,247,.1) 0%,transparent 70%);top:-150px;left:-150px;pointer-events:none;}
+body::after{content:'';position:fixed;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.08) 0%,transparent 70%);bottom:-100px;right:-100px;pointer-events:none;}
+.wrap{width:100%;max-width:420px;padding:20px;z-index:1;animation:fadeUp .4s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.lgo{text-align:center;margin-bottom:30px;}
+.lgo-icon{width:54px;height:54px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:15px;display:inline-flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:17px;font-weight:700;color:#fff;margin-bottom:13px;box-shadow:0 8px 28px rgba(79,142,247,.3);}
+.lgo-name{font-size:21px;font-weight:800;margin-bottom:3px;}
+.lgo-sub{font-size:12px;color:var(--muted);}
+.lcard{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:30px;}
+.ltitle{font-size:17px;font-weight:800;margin-bottom:3px;}
+.lsub{font-size:12px;color:var(--muted);margin-bottom:22px;}
+.role-sw{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:3px;margin-bottom:20px;gap:3px;}
+.role-btn{flex:1;padding:7px;border-radius:7px;border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;transition:all .16s;}
+.role-btn.active{background:var(--card);color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.lerr{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:9px;padding:9px 13px;font-size:12px;color:var(--danger);margin-bottom:14px;display:none;}
+.lbtn{width:100%;padding:12px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;transition:all .2s;margin-top:4px;}
+.lbtn:hover{background:#3a7be8;transform:translateY(-1px);box-shadow:0 8px 22px rgba(79,142,247,.3);}
+.hint{margin-top:18px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:9px;font-size:11px;color:var(--muted);text-align:center;}
+.hint b{color:var(--text);}
+</style>
+</head>
+<body>
+<script>
+// ===== INLINE AUTH — platform.js-сиз ишлайди =====
+const Auth = {
+  getUsers(){ try{ return JSON.parse(localStorage.getItem('plt_users')||'[]'); }catch(e){return[];} },
+  saveUsers(u){ try{ localStorage.setItem('plt_users', JSON.stringify(u)); }catch(e){} },
+  setCurrent(u){ try{ localStorage.setItem('plt_me', JSON.stringify(u)); }catch(e){} },
+  getCurrent(){ try{ return JSON.parse(localStorage.getItem('plt_me')||'null'); }catch(e){return null;} }
+};
+
+// Admin-ни хамиша яратамиз
+(function(){
+  try {
+    const users = Auth.getUsers();
+    if(!users.find(u=>u.username==='admin')){
+      users.push({id:1, name:'Администратор', username:'admin', password:'admin123', role:'admin'});
+      Auth.saveUsers(users);
+    }
+  } catch(e){ console.error('Seed error:', e); }
+})();
+
+// Агар аллакай дохил шуда бошад
+try {
+  const me = Auth.getCurrent();
+  if(me){ window.location.href = me.role==='admin' ? 'admin.html' : 'pupil.html'; }
+} catch(e){}
+</script>
+<div class="wrap">
+  <div class="lgo">
+    <div class="lgo-icon">&lt;/&gt;</div>
+    <div class="lgo-name">CodeAcademy TJ</div>
+    <div class="lgo-sub">Платформаи омӯзиши барномасозӣ</div>
+  </div>
+  <div class="lcard">
+    <div class="ltitle">Хуш омадед 👋</div>
+    <div class="lsub">Логин ва паролро ворид кунед</div>
+
+    <div class="lerr" id="err">Логин ё парол нодуруст аст!</div>
+
+    <div class="form-group">
+      <label class="form-label">Логин</label>
+      <input class="form-input" id="uname" type="text" placeholder="Логинро ворид кунед" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Парол</label>
+      <input class="form-input" id="upass" type="password" placeholder="Паролро ворид кунед" autocomplete="current-password">
+    </div>
+    <button class="lbtn" onclick="doLogin()">Даромадан →</button>
+
+    <div class="hint">Намунаи Admin: <b>admin</b> / <b>admin123</b></div>
+  </div>
+</div>
+<script>
+function doLogin(){
+  const uname = document.getElementById('uname').value.trim();
+  const upass = document.getElementById('upass').value.trim();
+  const err = document.getElementById('err');
+  err.style.display = 'none';
+
+  if(!uname || !upass){
+    err.textContent = 'Логин ва паролро ворид кунед!';
+    err.style.display = 'block';
+    return;
+  }
+
+  try {
+    // Ҳамеша Admin мавҷуд бошад
+    const users = Auth.getUsers();
+    if(!users.find(u=>u.username==='admin')){
+      users.push({id:1, name:'Администратор', username:'admin', password:'admin123', role:'admin'});
+      Auth.saveUsers(users);
+    }
+
+    const allUsers = Auth.getUsers();
+    const user = allUsers.find(u => u.username===uname && u.password===upass);
+
+    if(!user){
+      err.textContent = 'Логин ё парол нодуруст! Admin: admin / admin123';
+      err.style.display = 'block';
+      return;
+    }
+
+    Auth.setCurrent(user);
+    window.location.href = user.role==='admin' ? 'admin.html' : 'pupil.html';
+
+  } catch(e) {
+    err.textContent = 'Хато: ' + e.message;
+    err.style.display = 'block';
+  }
+}
+
+document.addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Курсҳо — CodeAcademy TJ</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.course-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+.c-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .25s;}
+.c-card:hover{transform:translateY(-3px);border-color:rgba(79,142,247,.3);box-shadow:0 12px 32px rgba(0,0,0,.4);}
+.c-thumb{height:110px;display:flex;align-items:center;justify-content:center;font-size:44px;background:var(--surface);}
+.c-body{padding:14px;}
+.c-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 9px;border-radius:100px;margin-bottom:8px;}
+.c-title{font-size:14px;font-weight:700;margin-bottom:5px;}
+.c-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+.c-foot{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);}
+.video-layout{display:grid;grid-template-columns:1fr 300px;gap:18px;}
+.v-player{background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9;border:1px solid var(--border);}
+.v-player iframe{width:100%;height:100%;border:none;}
+.v-player .v-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);gap:10px;}
+.play-icon{width:60px;height:60px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(79,142,247,.4);}
+.lesson-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:9px;cursor:pointer;transition:background .16s;}
+.lesson-item:hover{background:var(--surface);}
+.lesson-item.active{background:rgba(79,142,247,.08);}
+.l-num{width:26px;height:26px;border-radius:7px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);flex-shrink:0;}
+.lesson-item.active .l-num{background:rgba(79,142,247,.15);border-color:rgba(79,142,247,.3);color:var(--accent);}
+.l-info{flex:1;min-width:0;}
+.l-name{font-size:12px;font-weight:600;margin-bottom:2px;}
+.l-dur{font-size:11px;color:var(--muted);}
+.prog-btn{padding:5px 13px;font-size:11px;font-weight:700;border-radius:7px;border:1px solid rgba(16,185,129,.3);background:rgba(16,185,129,.1);color:var(--green);cursor:pointer;font-family:'Sora',sans-serif;transition:all .16s;}
+.prog-btn:hover{background:rgba(16,185,129,.2);}
+@media(max-width:860px){.course-grid{grid-template-columns:1fr;}.video-layout{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<script src="platform.js"></script>
+
+<div class="sidebar">
+  <div class="s-logo">
+    <div class="s-logo-icon">&lt;/&gt;</div>
+    <div class="s-logo-text">CodeAcademy <small>Талаба</small></div>
+  </div>
+  <nav class="s-nav">
+    <a class="s-item" href="pupil.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Дашборд</a>
+    <a class="s-item active" href="courses.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Курсҳо</a>
+    <a class="s-item" href="zadacha.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Вазифаҳо</a>
+    <a class="s-item" href="test.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Тестҳо</a>
+    <a class="s-item" href="reyting.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Рейтинг</a>
+    <a class="s-item" href="interpreter.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> Интерпретатор</a>
+  </nav>
+  <div class="s-footer">
+    <div class="avatar" id="av-init">ТА</div>
+    <div class="av-info"><div class="av-name" id="av-name">Талаба</div><div class="av-role">Талаба</div></div>
+    <button class="logout-btn" onclick="Auth.logout()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title" id="tb-title">📚 <span>Ҳамаи Курсҳо</span></div>
+    <div class="tb-right"><button class="btn btn-outline btn-sm" id="back-btn" onclick="showCourseList()" style="display:none">← Бозгашт</button></div>
+  </div>
+  <div class="content">
+    <!-- COURSE LIST -->
+    <div id="view-list">
+      <div class="course-grid" id="course-grid"></div>
+    </div>
+    <!-- VIDEO VIEW -->
+    <div id="view-video" style="display:none">
+      <div class="video-layout">
+        <div>
+          <div class="v-player" id="v-player"></div>
+          <div style="margin-top:16px">
+            <div style="font-size:17px;font-weight:800;margin-bottom:6px" id="v-title">—</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:14px" id="v-meta">—</div>
+            <button class="prog-btn" onclick="markDone()">✓ Дарсро тамом кардам</button>
+          </div>
+        </div>
+        <div class="card" style="height:fit-content">
+          <div class="card-hd"><span class="card-title" id="v-course-title">Дарсҳо</span><span id="v-progress-badge" class="badge b-green"></span></div>
+          <div id="lesson-list" style="padding:8px;max-height:65vh;overflow-y:auto"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const me = Auth.requirePupil();
+if(me){ document.getElementById('av-name').textContent=me.name; document.getElementById('av-init').textContent=initials(me.name); }
+
+let activeCourse=null, activeVideo=null;
+
+function showCourseList(){
+  document.getElementById('view-list').style.display='';
+  document.getElementById('view-video').style.display='none';
+  document.getElementById('back-btn').style.display='none';
+  document.getElementById('tb-title').innerHTML='📚 <span>Ҳамаи Курсҳо</span>';
+  renderCourses();
+}
+
+function renderCourses(){
+  const courses = DB.getCourses();
+  const progress = DB.getProgress(me.id);
+  const grid = document.getElementById('course-grid');
+  if(!courses.length){ grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">📚</div><div class="empty-text">Ҳанӯз курс нест. Аз Admin хоҳиш кунед!</div></div>'; return; }
+  grid.innerHTML = courses.map(c=>{
+    const pct = progress[c.id]||0;
+    return `<div class="c-card" onclick="openCourse(${c.id})">
+      <div class="c-thumb">${c.emoji||'📚'}</div>
+      <div class="c-body">
+        <div class="c-tag badge b-blue">${c.level||'IT'}</div>
+        <div class="c-title">${c.title}</div>
+        <div class="c-desc">${c.desc||''}</div>
+        <div class="prog-wrap" style="margin-bottom:6px"><div class="prog-fill" style="width:${pct}%"></div></div>
+        <div class="c-foot">
+          <span>${pct}% тамом</span>
+          <span style="color:var(--accent);font-weight:600">${pct===100?'✓ Тамом':'Идома →'}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openCourse(cid){
+  activeCourse = DB.getCourses().find(c=>c.id===cid);
+  if(!activeCourse) return;
+  const videos = DB.getVideosByCourse(cid);
+  document.getElementById('view-list').style.display='none';
+  document.getElementById('view-video').style.display='';
+  document.getElementById('back-btn').style.display='';
+  document.getElementById('tb-title').innerHTML=`${activeCourse.emoji||'📚'} <span>${activeCourse.title}</span>`;
+  document.getElementById('v-course-title').textContent=activeCourse.title;
+  if(videos.length) loadVideo(videos[0], videos);
+  else { document.getElementById('v-player').innerHTML='<div class="v-placeholder"><div class="play-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div>Ҳанӯз видео нест</div></div>'; renderLessons([], null); }
+}
+
+function loadVideo(v, videos){
+  activeVideo = v;
+  document.getElementById('v-title').textContent = v.title;
+  document.getElementById('v-meta').textContent = `⏱️ ${v.duration||'—'} • ${activeCourse.title}`;
+  document.getElementById('v-player').innerHTML = v.url
+    ? `<video src="${v.url}" controls style="width:100%;height:100%;background:#000" controlsList="nodownload"></video>`
+    : '<div class="v-placeholder"><div class="play-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div>Видео нест</div></div>';
+  renderLessons(videos||DB.getVideosByCourse(activeCourse.id), v.id);
+}
+
+function renderLessons(videos, activeId){
+  const progress = DB.getProgress(me.id);
+  const pct = progress[activeCourse.id]||0;
+  document.getElementById('v-progress-badge').textContent = pct+'%';
+  const ll = document.getElementById('lesson-list');
+  if(!videos.length){ ll.innerHTML='<div class="empty"><div class="empty-icon">🎬</div><div class="empty-text">Видео нест</div></div>'; return; }
+  ll.innerHTML = videos.map((v,i)=>{
+    const watched = DB.isWatched(me.id, v.id);
+    return `<div class="lesson-item ${v.id===activeId?'active':''} ${watched?'done':''}" onclick="loadVideo(${JSON.stringify(v).replace(/"/g,'&quot;')}, null)">
+      <div class="l-num" style="${watched?'background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3);color:var(--green)':''}">${watched?'✓':i+1}</div>
+      <div class="l-info"><div class="l-name">${v.title}</div><div class="l-dur">${v.duration||'—'}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function markDone(){
+  if(!activeCourse || !activeVideo) return;
+  // Mark this video as watched
+  DB.markWatched(me.id, activeVideo.id);
+  const videos = DB.getVideosByCourse(activeCourse.id);
+  const watched = videos.filter(v=>DB.isWatched(me.id, v.id)).length;
+  const pct = videos.length ? Math.round(watched/videos.length*100) : 100;
+  DB.setProgress(me.id, activeCourse.id, pct);
+  // Auto cert if 100%
+  if(pct>=100 && !DB.hasCert(me.id, activeCourse.id)){
+    DB.addCert(me.id, activeCourse.id);
+    showToast('🏅 Табрик! Сертификат гирифтед! Сертификат саҳифаро бинед.');
+  } else {
+    showToast(`✓ Дарс тамом! Пешрафт: ${pct}%`);
+  }
+  renderLessons(videos, activeVideo?.id);
+}
+
+showCourseList();
+</script>
+</body>
+</html>

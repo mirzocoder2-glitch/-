@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Рейтинг — CodeAcademy TJ</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:12px;margin-bottom:32px;}
+.pod{text-align:center;flex:1;max-width:160px;}
+.pod-box{border-radius:14px 14px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:16px 10px;position:relative;}
+.pod-1 .pod-box{background:linear-gradient(180deg,rgba(245,158,11,.2),rgba(245,158,11,.05));border:1px solid rgba(245,158,11,.3);height:140px;}
+.pod-2 .pod-box{background:linear-gradient(180deg,rgba(148,163,184,.15),rgba(148,163,184,.03));border:1px solid rgba(148,163,184,.25);height:110px;}
+.pod-3 .pod-box{background:linear-gradient(180deg,rgba(180,120,60,.15),rgba(180,120,60,.03));border:1px solid rgba(180,120,60,.25);height:90px;}
+.pod-avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;margin-bottom:8px;}
+.pod-1 .pod-avatar{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;}
+.pod-2 .pod-avatar{background:linear-gradient(135deg,#94a3b8,#64748b);color:#fff;}
+.pod-3 .pod-avatar{background:linear-gradient(135deg,#b45309,#92400e);color:#fff;}
+.pod-medal{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:24px;}
+.pod-name{font-size:12px;font-weight:700;margin-top:4px;}
+.pod-score{font-size:11px;color:var(--muted);}
+
+.rank-row{display:flex;align-items:center;gap:13px;padding:12px 18px;border-bottom:1px solid rgba(28,34,53,.7);transition:background .16s;}
+.rank-row:hover{background:rgba(79,142,247,.04);}
+.rank-row:last-child{border-bottom:none;}
+.rank-row.me{background:rgba(79,142,247,.07);border-left:3px solid var(--accent);}
+.rank-num{width:28px;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--muted);text-align:center;flex-shrink:0;}
+.rank-num.top{color:var(--yellow);}
+.rank-name{flex:1;font-size:13px;font-weight:600;}
+.rank-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.rank-score{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--accent);}
+</style>
+</head>
+<body>
+<script src="platform.js"></script>
+
+<div class="sidebar">
+  <div class="s-logo"><div class="s-logo-icon">&lt;/&gt;</div><div class="s-logo-text">CodeAcademy <small id="role-label">Талаба</small></div></div>
+  <nav class="s-nav" id="side-nav"></nav>
+  <div class="s-footer">
+    <div class="avatar" id="av-init">ТА</div>
+    <div class="av-info"><div class="av-name" id="av-name">Талаба</div><div class="av-role" id="av-role">Талаба</div></div>
+    <button class="logout-btn" onclick="Auth.logout()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar"><div class="tb-title">🏆 <span>Рейтинги талабаҳо</span></div></div>
+  <div class="content">
+    <div class="stats-row" id="stats-row"></div>
+    <!-- PODIUM -->
+    <div class="podium" id="podium"></div>
+    <!-- TABLE -->
+    <div class="card">
+      <div class="card-hd"><span class="card-title">📊 Рӯйхати пурраи рейтинг</span></div>
+      <div id="rank-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const me = Auth.require();
+if(me){
+  document.getElementById('av-name').textContent=me.name;
+  document.getElementById('av-init').textContent=initials(me.name);
+  document.getElementById('av-role').textContent=me.role==='admin'?'Администратор':'Талаба';
+  document.getElementById('role-label').textContent=me.role==='admin'?'Администратор':'Талаба';
+  // Nav
+  const nav = document.getElementById('side-nav');
+  if(me.role==='admin'){
+    nav.innerHTML=`
+      <a class="s-item" href="admin.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Панел</a>
+      <a class="s-item active" href="reyting.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Рейтинг</a>`;
+  } else {
+    nav.innerHTML=`
+      <a class="s-item" href="pupil.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Дашборд</a>
+      <a class="s-item" href="courses.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Курсҳо</a>
+      <a class="s-item" href="zadacha.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Вазифаҳо</a>
+      <a class="s-item" href="test.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Тестҳо</a>
+      <a class="s-item active" href="reyting.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Рейтинг</a>`;
+  }
+}
+
+function render(){
+  const users = Auth.getUsers().filter(u=>u.role==='pupil');
+  const results = DB.getResults();
+  const subs = DB.getSubmissions();
+
+  // Ҳисоби хол барои ҳар талаба
+  const ranked = users.map(u=>{
+    const myRes = results.filter(r=>r.userId===u.id);
+    const mySubs = subs.filter(s=>s.userId===u.id);
+    const avgTest = myRes.length ? Math.round(myRes.reduce((a,r)=>a+r.score,0)/myRes.length) : 0;
+    const taskPts = mySubs.reduce((a,s)=>a+(s.points||0),0);
+    const courses = DB.getCourses();
+    const prog = DB.getProgress(u.id);
+    const avgProg = courses.length ? Math.round(Object.values(prog).reduce((a,b)=>a+b,0)/courses.length) : 0;
+    const total = Math.round(avgTest*0.5 + taskPts + avgProg*0.3);
+    return {id:u.id, name:u.name, avgTest, taskPts, avgProg, total, testsCount:myRes.length, tasksCount:mySubs.length};
+  }).sort((a,b)=>b.total-a.total);
+
+  // Stats
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat-box"><div class="stat-ico" style="background:rgba(79,142,247,.1);color:var(--accent)">👥</div><div class="stat-val" style="color:var(--accent)">${users.length}</div><div class="stat-lbl">Талабаҳо</div></div>
+    <div class="stat-box"><div class="stat-ico" style="background:rgba(245,158,11,.1);color:var(--yellow)">🏆</div><div class="stat-val" style="color:var(--yellow)">${ranked[0]?.total||0}</div><div class="stat-lbl">Олимаком хол</div></div>
+    <div class="stat-box"><div class="stat-ico" style="background:rgba(16,185,129,.1);color:var(--green)">✅</div><div class="stat-val" style="color:var(--green)">${results.length}</div><div class="stat-lbl">Тест гузаронда</div></div>
+    <div class="stat-box"><div class="stat-ico" style="background:rgba(124,58,237,.1);color:#a78bfa">📝</div><div class="stat-val" style="color:#a78bfa">${subs.length}</div><div class="stat-lbl">Вазифа супорида</div></div>
+  `;
+
+  // Podium
+  const podiumEl = document.getElementById('podium');
+  if(ranked.length===0){podiumEl.innerHTML='';return;}
+  const p = [ranked[1],ranked[0],ranked[2]].filter(Boolean);
+  const classes=['pod-2','pod-1','pod-3'];
+  const medals=['🥈','🥇','🥉'];
+  const order=[1,0,2];
+  podiumEl.innerHTML = p.map((u,i)=>{
+    const cls=classes[i];
+    const medal=medals[i];
+    return `<div class="pod ${cls}">
+      <div class="pod-box">
+        <div class="pod-medal">${medal}</div>
+        <div class="pod-avatar">${initials(u.name)}</div>
+      </div>
+      <div class="pod-name">${u.name.split(' ')[0]}</div>
+      <div class="pod-score" style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;margin-top:2px">${u.total} хол</div>
+    </div>`;
+  }).join('');
+
+  // Rank list
+  const rl = document.getElementById('rank-list');
+  if(!ranked.length){rl.innerHTML='<div class="empty"><div class="empty-icon">🏆</div><div class="empty-text">Ҳанӯз талаба нест</div></div>';return;}
+  rl.innerHTML = ranked.map((u,i)=>{
+    const isMe = me && u.id===me.id;
+    return `<div class="rank-row ${isMe?'me':''}">
+      <div class="rank-num ${i<3?'top':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+      <div class="avatar" style="width:30px;height:30px;font-size:11px;flex-shrink:0">${initials(u.name)}</div>
+      <div class="rank-name">${u.name}${isMe?' <span class="badge b-blue" style="font-size:10px">Шумо</span>':''}</div>
+      <div class="rank-badges">
+        <span class="badge b-yellow">✅ ${u.avgTest}%</span>
+        <span class="badge b-purple">📝 ${u.tasksCount} вазифа</span>
+        <span class="badge b-green">📊 ${u.avgProg}%</span>
+      </div>
+      <div class="rank-score">${u.total}</div>
+    </div>`;
+  }).join('');
+}
+
+render();
+</script>
+</body>
+</html>

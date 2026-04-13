@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Дашборд — CodeAcademy TJ</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<script src="platform.js"></script>
+
+<div class="sidebar">
+  <div class="s-logo">
+    <div class="s-logo-icon">&lt;/&gt;</div>
+    <div class="s-logo-text">CodeAcademy <small>Талаба</small></div>
+  </div>
+  <nav class="s-nav">
+    <a class="s-item active" href="pupil.html">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Дашборд
+    </a>
+    <a class="s-item" href="courses.html">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Курсҳо
+    </a>
+    <a class="s-item" href="zadacha.html">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Вазифаҳо
+    </a>
+    <a class="s-item" href="test.html">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Тестҳо
+    </a>
+    <a class="s-item" href="reyting.html">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Рейтинг
+    </a>
+  </nav>
+  <div class="s-footer">
+    <div class="avatar" id="av-init">ТА</div>
+    <div class="av-info"><div class="av-name" id="av-name">Талаба</div><div class="av-role">Талаба</div></div>
+    <button class="logout-btn" onclick="Auth.logout()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title">Хуш омадед, <span id="tb-name">Талаба</span>! 👋</div>
+  </div>
+  <div class="content">
+    <div class="stats-row" id="stats-row"></div>
+    <div class="g2 mb22">
+      <!-- PROGRESS -->
+      <div class="card">
+        <div class="card-hd"><span class="card-title">📈 Пешрафти курсҳо</span><a href="courses.html" class="btn btn-outline btn-xs">Ҳамааш</a></div>
+        <div id="progress-list" style="padding:4px 0"></div>
+      </div>
+      <!-- RECENT RESULTS -->
+      <div class="card">
+        <div class="card-hd"><span class="card-title">🏆 Охирин натиҷаҳо</span></div>
+        <div id="results-list" style="padding:4px 0"></div>
+      </div>
+    </div>
+    <!-- TASKS PREVIEW -->
+    <div class="card">
+      <div class="card-hd"><span class="card-title">📝 Вазифаҳои наздик</span><a href="zadacha.html" class="btn btn-outline btn-xs">Ҳамааш</a></div>
+      <table class="tbl"><thead><tr><th>Вазифа</th><th>Мавзӯъ</th><th>Муҳлат</th><th>Хол</th></tr></thead><tbody id="tb-tasks"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script>
+const me = Auth.requirePupil();
+if(me){
+  document.getElementById('av-name').textContent = me.name;
+  document.getElementById('av-init').textContent = initials(me.name);
+  document.getElementById('tb-name').textContent = me.name.split(' ')[0];
+}
+
+function render(){
+  const courses = DB.getCourses();
+  const results = DB.getResults().filter(r=>r.userId===me.id);
+  const tasks = DB.getTasks();
+  const progress = DB.getProgress(me.id);
+
+  // Stats
+  const totalPct = courses.length ? Math.round(Object.values(progress).reduce((a,b)=>a+b,0)/courses.length) : 0;
+  const avgScore = results.length ? Math.round(results.reduce((a,r)=>a+r.score,0)/results.length) : 0;
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-box"><div class="stat-ico" style="background:rgba(79,142,247,.1);color:var(--accent)">📚</div><div class="stat-val" style="color:var(--accent)">${courses.length}</div><div class="stat-lbl">Курсҳо</div></div>
+    <div class="stat-box"><div class="stat-ico" style="background:rgba(16,185,129,.1);color:var(--green)">📊</div><div class="stat-val" style="color:var(--green)">${totalPct}%</div><div class="stat-lbl">Умумӣ пешрафт</div></div>
+    <div class="stat-box"><div class="stat-ico" style="background:rgba(245,158,11,.1);color:var(--yellow)">✅</div><div class="stat-val" style="color:var(--yellow)">${results.length}</div><div class="stat-lbl">Тест гузаронда</div></div>
+    <div class="stat-box"><div class="stat-ico" style="background:rgba(124,58,237,.1);color:#a78bfa">🏆</div><div class="stat-val" style="color:#a78bfa">${avgScore}%</div><div class="stat-lbl">Миёнаи тест</div></div>
+  `;
+
+  // Progress list
+  const pl = document.getElementById('progress-list');
+  if(!courses.length){ pl.innerHTML='<div class="empty"><div class="empty-icon">📚</div><div class="empty-text">Ҳанӯз курс нест</div></div>'; }
+  else {
+    pl.innerHTML = courses.map(c=>{
+      const pct = progress[c.id]||0;
+      return `<div style="padding:12px 18px;border-bottom:1px solid rgba(28,34,53,.5)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span>${c.emoji||'📚'}</span>
+          <span style="font-size:13px;font-weight:600;flex:1">${c.title}</span>
+          <span style="font-size:12px;color:var(--accent);font-weight:700">${pct}%</span>
+        </div>
+        <div class="prog-wrap"><div class="prog-fill" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('');
+  }
+
+  // Results
+  const rl = document.getElementById('results-list');
+  const myResults = results.slice(-5).reverse();
+  if(!myResults.length){ rl.innerHTML='<div class="empty"><div class="empty-icon">🏆</div><div class="empty-text">Ҳанӯз тест нагузаронед</div></div>'; }
+  else {
+    rl.innerHTML = myResults.map(r=>`
+      <div style="padding:12px 18px;border-bottom:1px solid rgba(28,34,53,.5);display:flex;align-items:center;gap:10px">
+        <div style="flex:1"><div style="font-size:13px;font-weight:600">${r.testTitle||'Тест'}</div><div style="font-size:11px;color:var(--muted)">${fmtDate(r.date)}</div></div>
+        <span class="badge ${r.score>=70?'b-green':r.score>=50?'b-yellow':'b-red'}">${r.score}%</span>
+      </div>
+    `).join('');
+  }
+
+  // Tasks
+  const tb = document.getElementById('tb-tasks');
+  if(!tasks.length){ tb.innerHTML=`<tr><td colspan="4"><div class="empty"><div class="empty-icon">📝</div><div class="empty-text">Вазифа нест</div></div></td></tr>`; return; }
+  const courses2 = DB.getCourses();
+  tb.innerHTML = tasks.slice(0,5).map(t=>{
+    const c = courses2.find(c=>c.id===t.courseId);
+    const isExpired = t.deadline && new Date(t.deadline) < new Date();
+    return `<tr>
+      <td><b>${t.title}</b></td>
+      <td>${c?c.emoji+' '+c.title:'—'}</td>
+      <td><span class="badge ${isExpired?'b-red':'b-yellow'}">${fmtDate(t.deadline)}</span></td>
+      <td><span class="badge b-green">+${t.points||0}</span></td>
+    </tr>`;
+  }).join('');
+}
+render();
+</script>
+</body>
+</html>

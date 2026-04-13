@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Админ — CodeAcademy TJ</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.tabs-nav{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:22px;}
+.tab-btn{padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .16s;background:none;border-top:none;border-left:none;border-right:none;font-family:'Sora',sans-serif;}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-btn:hover{color:var(--text);}
+.tab-pane{display:none;}.tab-pane.active{display:block;}
+.q-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:10px;}
+.q-row .form-input{flex:1;}
+.q-del{background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:8px 4px;flex-shrink:0;}
+.opt-row{display:flex;gap:8px;margin-bottom:6px;align-items:center;}
+.opt-radio{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0;}
+.opt-input{flex:1;}
+.opt-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;}
+.user-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;margin:3px;}
+.section-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+</style>
+</head>
+<body>
+<script src="platform.js"></script>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="s-logo">
+    <div class="s-logo-icon">&lt;/&gt;</div>
+    <div class="s-logo-text">CodeAcademy <small>Администратор</small></div>
+  </div>
+  <nav class="s-nav">
+    <a class="s-item active" href="admin.html">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Панели Асосӣ
+    </a>
+    <a class="s-item" href="jadval.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Ҷадвал</a>
+    <a class="s-item" href="chat.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Чат</a>
+    <a class="s-item" href="reyting.html">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Рейтинг
+    </a>
+  </nav>
+  <div class="s-footer">
+    <div class="avatar" id="av-init">АД</div>
+    <div class="av-info"><div class="av-name" id="av-name">Администратор</div><div class="av-role">Admin</div></div>
+    <button class="logout-btn" onclick="Auth.logout()" title="Баромадан">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title">Панели <span>Администратор</span></div>
+    <div class="tb-right">
+      <div class="icon-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><div class="notif-dot"></div></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- STATS -->
+    <div class="stats-row" id="stats-row"></div>
+
+    <!-- TABS -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="showTab('courses',this)">📚 Мавзӯъҳо</button>
+      <button class="tab-btn" onclick="showTab('videos',this)">🎬 Видеоҳо</button>
+      <button class="tab-btn" onclick="showTab('users',this)">👤 Талабаҳо</button>
+      <button class="tab-btn" onclick="showTab('tasks',this)">📝 Вазифаҳо</button>
+      <button class="tab-btn" onclick="showTab('tests',this)">✅ Тестҳо</button>
+      <button class="tab-btn" onclick="showTab('submissions',this)">📬 Супоришҳо</button>
+    </div>
+
+    <!-- COURSES TAB -->
+    <div id="tab-courses" class="tab-pane active">
+      <div class="section-bar">
+        <div style="font-size:14px;font-weight:700;">Рӯйхати мавзӯъҳо</div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-course')">+ Илова кардан</button>
+      </div>
+      <div class="card"><table class="tbl"><thead><tr><th>Мавзӯъ</th><th>Сатҳ</th><th>Видеоҳо</th><th>Амал</th></tr></thead><tbody id="tb-courses"></tbody></table></div>
+    </div>
+
+    <!-- VIDEOS TAB -->
+    <div id="tab-videos" class="tab-pane">
+      <div class="section-bar">
+        <div style="font-size:14px;font-weight:700;">Видео дарсҳо</div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-video')">+ Видео илова</button>
+      </div>
+      <div class="card"><table class="tbl"><thead><tr><th>Видео</th><th>Мавзӯъ</th><th>Давомнокӣ</th><th>Амал</th></tr></thead><tbody id="tb-videos"></tbody></table></div>
+    </div>
+
+    <!-- USERS TAB -->
+    <div id="tab-users" class="tab-pane">
+      <div class="section-bar">
+        <div style="font-size:14px;font-weight:700;">Талабаҳо</div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-user')">+ Талаба илова</button>
+      </div>
+      <div class="card"><table class="tbl"><thead><tr><th>Ном</th><th>Логин</th><th>Парол</th><th>Сана</th><th>Амал</th></tr></thead><tbody id="tb-users"></tbody></table></div>
+    </div>
+
+    <!-- TASKS TAB -->
+    <div id="tab-tasks" class="tab-pane">
+      <div class="section-bar">
+        <div style="font-size:14px;font-weight:700;">Вазифаҳо</div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-task')">+ Вазифа илова</button>
+      </div>
+      <div class="card"><table class="tbl"><thead><tr><th>Вазифа</th><th>Мавзӯъ</th><th>Муҳлат</th><th>Хол</th><th>Амал</th></tr></thead><tbody id="tb-tasks"></tbody></table></div>
+    </div>
+
+    <!-- SUBMISSIONS TAB -->
+    <div id="tab-submissions" class="tab-pane">
+      <div class="section-bar">
+        <div style="font-size:14px;font-weight:700;">📬 Супоришҳои талабаҳо</div>
+        <span id="sub-count-badge" class="badge b-yellow"></span>
+      </div>
+      <div class="card"><table class="tbl"><thead><tr><th>Талаба</th><th>Вазифа</th><th>Ҷавоб</th><th>Файл</th><th>Холҳо</th><th>Ҳолат</th><th>Амал</th></tr></thead><tbody id="tb-submissions"></tbody></table></div>
+    </div>
+
+    <!-- TESTS TAB -->
+    <div id="tab-tests" class="tab-pane">
+      <div class="section-bar">
+        <div style="font-size:14px;font-weight:700;">Тестҳо</div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-test')">+ Тест илова</button>
+      </div>
+      <div class="card"><table class="tbl"><thead><tr><th>Тест</th><th>Мавзӯъ</th><th>Саволҳо</th><th>Вақт</th><th>Амал</th></tr></thead><tbody id="tb-tests"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: COURSE -->
+<div class="modal-overlay" id="modal-course">
+  <div class="modal">
+    <div class="modal-title">📚 Мавзӯъ илова кардан</div>
+    <div class="modal-sub">Мавзӯи нав созед</div>
+    <div class="form-group"><label class="form-label">Номи мавзӯъ</label><input class="form-input" id="c-title" placeholder="Масалан: Python — Асосҳо"></div>
+    <div class="form-group"><label class="form-label">Тавсиф</label><textarea class="form-input" id="c-desc" placeholder="Мавзӯъ дар бораи чист?"></textarea></div>
+    <div class="g2">
+      <div class="form-group"><label class="form-label">Эмодзи</label><input class="form-input" id="c-emoji" placeholder="🐍" maxlength="2"></div>
+      <div class="form-group"><label class="form-label">Сатҳ</label>
+        <select class="form-input" id="c-level"><option>Осон</option><option>Миёна</option><option>Мураккаб</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-course')">Бекор</button>
+      <button class="btn btn-primary" onclick="saveCourse()">Сохтан</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: VIDEO -->
+<div class="modal-overlay" id="modal-video">
+  <div class="modal">
+    <div class="modal-title">🎬 Видео илова кардан</div>
+    <div class="modal-sub">Видеоро аз компютери худ интихоб кунед</div>
+    <div class="form-group"><label class="form-label">Номи видео</label><input class="form-input" id="v-title" placeholder="Масалан: Муқаддима ба Python"></div>
+    <div class="form-group"><label class="form-label">Мавзӯъ</label><select class="form-input" id="v-course"></select></div>
+    <div class="form-group">
+      <label class="form-label">Файли видео (mp4, avi, mkv...)</label>
+      <div id="v-dropzone" style="border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;" onclick="document.getElementById('v-file').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
+        <div style="font-size:32px;margin-bottom:8px">🎬</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px" id="v-file-name">Файлро интихоб кунед</div>
+        <div style="font-size:11px;color:var(--muted)">ё кашола кунед (drag & drop)</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">mp4, avi, mkv, mov, webm</div>
+      </div>
+      <input type="file" id="v-file" accept="video/*" style="display:none" onchange="fileSelected(this)">
+    </div>
+    <div class="form-group"><label class="form-label">Давомнокӣ</label><input class="form-input" id="v-dur" placeholder="Масалан: 15 дақ"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-video')">Бекор</button>
+      <button class="btn btn-primary" onclick="saveVideo()">Сохтан</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: USER -->
+<div class="modal-overlay" id="modal-user">
+  <div class="modal">
+    <div class="modal-title">👤 Талаба илова кардан</div>
+    <div class="modal-sub">Логин ва паролро шумо месозед</div>
+    <div class="form-group"><label class="form-label">Номи пурра</label><input class="form-input" id="u-name" placeholder="Масалан: Алӣ Раҳмонов"></div>
+    <div class="g2">
+      <div class="form-group"><label class="form-label">Логин</label><input class="form-input" id="u-login" placeholder="ali_r"></div>
+      <div class="form-group"><label class="form-label">Парол</label><input class="form-input" id="u-pass" placeholder="камаш 6 рамз"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-user')">Бекор</button>
+      <button class="btn btn-primary" onclick="saveUser()">Сохтан</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TASK -->
+<div class="modal-overlay" id="modal-task">
+  <div class="modal">
+    <div class="modal-title">📝 Вазифа илова кардан</div>
+    <div class="modal-sub">Талабаҳо вазифаро иҷро мекунанд</div>
+    <div class="form-group"><label class="form-label">Номи вазифа</label><input class="form-input" id="t-title" placeholder="Масалан: Калкулятор созед"></div>
+    <div class="form-group"><label class="form-label">Тавсифи муфассал</label><textarea class="form-input" id="t-desc" placeholder="Вазифа чист? Чӣ талаб мешавад?"></textarea></div>
+    <div class="form-group"><label class="form-label">Мавзӯъ</label><select class="form-input" id="t-course"></select></div>
+    <div class="g2">
+      <div class="form-group"><label class="form-label">Муҳлат</label><input class="form-input" id="t-dead" type="date"></div>
+      <div class="form-group"><label class="form-label">Хол</label><input class="form-input" id="t-pts" type="number" placeholder="10" min="1"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-task')">Бекор</button>
+      <button class="btn btn-primary" onclick="saveTask()">Сохтан</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TEST -->
+<div class="modal-overlay" id="modal-test">
+  <div class="modal">
+    <div class="modal-title">✅ Тест илова кардан</div>
+    <div class="modal-sub">Саволҳо ва ҷавобҳоро ворид кунед</div>
+    <div class="form-group"><label class="form-label">Номи тест</label><input class="form-input" id="ts-title" placeholder="Масалан: Python Асосҳо"></div>
+    <div class="g2">
+      <div class="form-group"><label class="form-label">Мавзӯъ</label><select class="form-input" id="ts-course"></select></div>
+      <div class="form-group"><label class="form-label">Вақт (сония)</label><input class="form-input" id="ts-time" type="number" value="120" min="30"></div>
+    </div>
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">Саволҳо</div>
+    <div id="questions-list"></div>
+    <button class="btn btn-outline btn-sm" onclick="addQuestion()" style="width:100%;margin-bottom:4px;">+ Савол илова</button>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-test')">Бекор</button>
+      <button class="btn btn-primary" onclick="saveTest()">Сохтан</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const me = Auth.requireAdmin();
+if(me){ document.getElementById('av-name').textContent = me.name; document.getElementById('av-init').textContent = initials(me.name); }
+
+function showTab(id, el){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ===== STATS =====
+function renderStats(){
+  const users = Auth.getUsers().filter(u=>u.role==='pupil');
+  const courses = DB.getCourses();
+  const tests = DB.getTests();
+  const tasks = DB.getTasks();
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-box"><div class="stat-ico" style="background:rgba(79,142,247,.1);color:var(--accent)">👤</div><div class="stat-val" style="color:var(--accent)">${users.length}</div><div class="stat-lbl">Талабаҳо</div></div>
+    <div class="stat-box"><div class="stat-ico" style="background:rgba(16,185,129,.1);color:var(--green)">📚</div><div class="stat-val" style="color:var(--green)">${courses.length}</div><div class="stat-lbl">Мавзӯъҳо</div></div>
+    <div class="stat-box"><div class="stat-ico" style="background:rgba(245,158,11,.1);color:var(--yellow)">✅</div><div class="stat-val" style="color:var(--yellow)">${tests.length}</div><div class="stat-lbl">Тестҳо</div></div>
+    <div class="stat-box"><div class="stat-ico" style="background:rgba(124,58,237,.1);color:#a78bfa">📝</div><div class="stat-val" style="color:#a78bfa">${tasks.length}</div><div class="stat-lbl">Вазифаҳо</div></div>
+  `;
+}
+
+// ===== COURSES =====
+function renderCourses(){
+  const courses = DB.getCourses();
+  const videos = DB.getVideos();
+  const tb = document.getElementById('tb-courses');
+  if(!courses.length){ tb.innerHTML=`<tr><td colspan="4"><div class="empty"><div class="empty-icon">📚</div><div class="empty-text">Ҳанӯз мавзӯъ нест</div></div></td></tr>`; return; }
+  tb.innerHTML = courses.map(c=>`
+    <tr>
+      <td><span style="margin-right:6px">${c.emoji||'📚'}</span><b>${c.title}</b><br><span style="font-size:11px;color:var(--muted)">${c.desc||''}</span></td>
+      <td><span class="badge b-blue">${c.level||'—'}</span></td>
+      <td>${videos.filter(v=>v.courseId===c.id).length} видео</td>
+      <td><button class="btn btn-danger btn-xs" onclick="delCourse(${c.id})">Нест кун</button></td>
+    </tr>
+  `).join('');
+}
+
+function saveCourse(){
+  const title=document.getElementById('c-title').value.trim();
+  if(!title){showToast('Номи мавзӯъро ворид кунед','error');return;}
+  DB.addCourse({title, desc:document.getElementById('c-desc').value.trim(), emoji:document.getElementById('c-emoji').value||'📚', level:document.getElementById('c-level').value});
+  closeModal('modal-course');
+  ['c-title','c-desc','c-emoji'].forEach(id=>document.getElementById(id).value='');
+  showToast('Мавзӯъ илова шуд!');
+  renderAll();
+}
+
+function delCourse(id){
+  if(!confirm('Мавзӯъро нест кунем?')) return;
+  DB.deleteCourse(id); showToast('Нест шуд'); renderAll();
+}
+
+// ===== VIDEOS =====
+function renderVideos(){
+  const videos = DB.getVideos();
+  const courses = DB.getCourses();
+  const tb = document.getElementById('tb-videos');
+  if(!videos.length){ tb.innerHTML=`<tr><td colspan="4"><div class="empty"><div class="empty-icon">🎬</div><div class="empty-text">Ҳанӯз видео нест</div></div></td></tr>`; return; }
+  tb.innerHTML = videos.map(v=>{
+    const c = courses.find(c=>c.id===v.courseId);
+    return `<tr>
+      <td><b>${v.title}</b></td>
+      <td>${c?c.emoji+' '+c.title:'—'}</td>
+      <td><span class="badge b-yellow">${v.duration||'—'}</span></td>
+      <td><button class="btn btn-danger btn-xs" onclick="delVideo(${v.id})">Нест кун</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function fillCourseSelect(selId){
+  const sel = document.getElementById(selId);
+  const courses = DB.getCourses();
+  sel.innerHTML = courses.length ? courses.map(c=>`<option value="${c.id}">${c.emoji||''} ${c.title}</option>`).join('') : '<option value="">— Мавзӯъ нест —</option>';
+}
+
+let selectedVideoBlob = null;
+
+function dragOver(e){
+  e.preventDefault();
+  document.getElementById('v-dropzone').style.borderColor='var(--accent)';
+  document.getElementById('v-dropzone').style.background='rgba(79,142,247,.05)';
+}
+function dragLeave(e){
+  document.getElementById('v-dropzone').style.borderColor='var(--border)';
+  document.getElementById('v-dropzone').style.background='';
+}
+function dropFile(e){
+  e.preventDefault();
+  dragLeave(e);
+  const file = e.dataTransfer.files[0];
+  if(file && file.type.startsWith('video/')) applyFile(file);
+  else showToast('Видео файл интихоб кунед!','error');
+}
+function fileSelected(input){
+  if(input.files[0]) applyFile(input.files[0]);
+}
+function applyFile(file){
+  selectedVideoBlob = file;
+  document.getElementById('v-file-name').textContent = '✓ ' + file.name;
+  document.getElementById('v-dropzone').style.borderColor='var(--green)';
+  document.getElementById('v-dropzone').style.color='var(--green)';
+  // Аз номи файл давомнокиро ба таври худкор ёбед
+  const dur = document.getElementById('v-dur');
+  if(!dur.value) dur.placeholder='Масалан: 15 дақ';
+}
+
+function saveVideo(){
+  const title = document.getElementById('v-title').value.trim();
+  if(!title){ showToast('Номро ворид кунед','error'); return; }
+  if(!selectedVideoBlob){ showToast('Файли видеоро интихоб кунед!','error'); return; }
+  const courseId = parseInt(document.getElementById('v-course').value);
+  const duration = document.getElementById('v-dur').value || '—';
+  // Файлро ба objectURL табдил медиҳем — дар браузер кор мекунад
+  const objectUrl = URL.createObjectURL(selectedVideoBlob);
+  DB.addVideo({title, courseId, url: objectUrl, fileName: selectedVideoBlob.name, duration});
+  closeModal('modal-video');
+  selectedVideoBlob = null;
+  document.getElementById('v-file-name').textContent = 'Файлро интихоб кунед';
+  document.getElementById('v-dropzone').style.borderColor='var(--border)';
+  document.getElementById('v-dropzone').style.color='';
+  document.getElementById('v-file').value='';
+  ['v-title','v-dur'].forEach(id=>document.getElementById(id).value='');
+  showToast('Видео илова шуд! ✓'); renderAll();
+}
+
+function delVideo(id){ DB.deleteVideo(id); showToast('Нест шуд'); renderAll(); }
+
+// ===== USERS =====
+function renderUsers(){
+  const users = Auth.getUsers().filter(u=>u.role==='pupil');
+  const tb = document.getElementById('tb-users');
+  if(!users.length){ tb.innerHTML=`<tr><td colspan="5"><div class="empty"><div class="empty-icon">👤</div><div class="empty-text">Ҳанӯз талаба нест</div></div></td></tr>`; return; }
+  tb.innerHTML = users.map(u=>`
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:11px">${initials(u.name)}</div><b>${u.name}</b></div></td>
+      <td><code style="background:var(--surface);padding:2px 7px;border-radius:5px;font-size:12px">${u.username}</code></td>
+      <td><code style="background:var(--surface);padding:2px 7px;border-radius:5px;font-size:12px">${u.password}</code></td>
+      <td style="color:var(--muted);font-size:12px">${fmtDate(u.createdAt)}</td>
+      <td><button class="btn btn-danger btn-xs" onclick="delUser(${u.id})">Нест кун</button></td>
+    </tr>
+  `).join('');
+}
+
+function saveUser(){
+  const name=document.getElementById('u-name').value.trim();
+  const username=document.getElementById('u-login').value.trim();
+  const password=document.getElementById('u-pass').value.trim();
+  if(!name||!username||!password){showToast('Ҳама майдонҳоро пур кунед','error');return;}
+  const users = Auth.getUsers();
+  if(users.find(u=>u.username===username)){showToast('Ин логин аллакай мавҷуд аст!','error');return;}
+  users.push({id:Date.now(), name, username, password, role:'pupil', createdAt:new Date().toISOString()});
+  Auth.saveUsers(users);
+  closeModal('modal-user');
+  ['u-name','u-login','u-pass'].forEach(id=>document.getElementById(id).value='');
+  showToast(`Талаба ${name} илова шуд!`); renderAll();
+}
+
+function delUser(id){
+  if(!confirm('Талабаро нест кунем?')) return;
+  const users = Auth.getUsers().filter(u=>u.id!==id);
+  Auth.saveUsers(users); showToast('Талаба нест шуд'); renderAll();
+}
+
+// ===== TASKS =====
+function renderTasks(){
+  const tasks = DB.getTasks();
+  const courses = DB.getCourses();
+  const tb = document.getElementById('tb-tasks');
+  if(!tasks.length){ tb.innerHTML=`<tr><td colspan="5"><div class="empty"><div class="empty-icon">📝</div><div class="empty-text">Ҳанӯз вазифа нест</div></div></td></tr>`; return; }
+  tb.innerHTML = tasks.map(t=>{
+    const c = courses.find(c=>c.id===t.courseId);
+    return `<tr>
+      <td><b>${t.title}</b><br><span style="font-size:11px;color:var(--muted)">${t.desc?.slice(0,50)||''}…</span></td>
+      <td>${c?c.emoji+' '+c.title:'—'}</td>
+      <td><span class="badge b-yellow">${fmtDate(t.deadline)}</span></td>
+      <td><span class="badge b-green">+${t.points||0} хол</span></td>
+      <td><button class="btn btn-danger btn-xs" onclick="delTask(${t.id})">Нест кун</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function saveTask(){
+  const title=document.getElementById('t-title').value.trim();
+  if(!title){showToast('Номро ворид кунед','error');return;}
+  const courseId = parseInt(document.getElementById('t-course').value)||null;
+  DB.addTask({title, desc:document.getElementById('t-desc').value.trim(), courseId, deadline:document.getElementById('t-dead').value, points:parseInt(document.getElementById('t-pts').value)||10});
+  closeModal('modal-task');
+  ['t-title','t-desc','t-dead','t-pts'].forEach(id=>document.getElementById(id).value='');
+  showToast('Вазифа илова шуд!'); renderAll();
+}
+
+function delTask(id){ DB.deleteTask(id); showToast('Нест шуд'); renderAll(); }
+
+// ===== TESTS =====
+let qCount = 0;
+function renderTests(){
+  const tests = DB.getTests();
+  const courses = DB.getCourses();
+  const tb = document.getElementById('tb-tests');
+  if(!tests.length){ tb.innerHTML=`<tr><td colspan="5"><div class="empty"><div class="empty-icon">✅</div><div class="empty-text">Ҳанӯз тест нест</div></div></td></tr>`; return; }
+  tb.innerHTML = tests.map(t=>{
+    const c = courses.find(c=>c.id===t.courseId);
+    return `<tr>
+      <td><b>${t.title}</b></td>
+      <td>${c?c.emoji+' '+c.title:'—'}</td>
+      <td><span class="badge b-blue">${t.questions?.length||0} савол</span></td>
+      <td><span class="badge b-yellow">${Math.floor((t.timeLimit||120)/60)} дақ</span></td>
+      <td><button class="btn btn-danger btn-xs" onclick="delTest(${t.id})">Нест кун</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function addQuestion(){
+  const qi = qCount++;
+  const div = document.createElement('div');
+  div.id = `q-${qi}`;
+  div.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;';
+  div.innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+      <input class="form-input" id="q-text-${qi}" placeholder="Савол матни..." style="flex:1">
+      <button onclick="this.closest('[id]').remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px">✕</button>
+    </div>
+    <div id="opts-${qi}"></div>
+    <button class="btn btn-outline btn-xs" onclick="addOpt(${qi})" style="margin-top:6px">+ Ҷавоб</button>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px">⭕ Дурустро интихоб кунед</div>
+  `;
+  document.getElementById('questions-list').appendChild(div);
+  // 4 ҷавоби стандартӣ
+  for(let i=0;i<4;i++) addOpt(qi);
+}
+
+function addOpt(qi){
+  const container = document.getElementById(`opts-${qi}`);
+  const oi = container.children.length;
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:8px;margin-bottom:6px;align-items:center;';
+  row.innerHTML = `
+    <input type="radio" name="ans-${qi}" value="${oi}" class="opt-radio" style="flex-shrink:0">
+    <input class="form-input opt-input" id="opt-${qi}-${oi}" placeholder="Ҷавоб ${oi+1}">
+    <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px">✕</button>
+  `;
+  container.appendChild(row);
+}
+
+function saveTest(){
+  const title=document.getElementById('ts-title').value.trim();
+  if(!title){showToast('Номро ворид кунед','error');return;}
+  const courseId=parseInt(document.getElementById('ts-course').value)||null;
+  const timeLimit=parseInt(document.getElementById('ts-time').value)||120;
+  // Саволҳоро ҷамъ кун
+  const questions=[];
+  document.querySelectorAll('#questions-list > div').forEach(qDiv=>{
+    const qi = qDiv.id.replace('q-','');
+    const qText = document.getElementById(`q-text-${qi}`)?.value.trim();
+    if(!qText) return;
+    const opts=[];
+    let ans=0;
+    qDiv.querySelectorAll('.opt-input').forEach((inp,i)=>{ if(inp.value.trim()) opts.push(inp.value.trim()); });
+    const radio = qDiv.querySelector(`input[name="ans-${qi}"]:checked`);
+    if(radio) ans=parseInt(radio.value);
+    if(opts.length>=2) questions.push({q:qText, opts, ans});
+  });
+  if(!questions.length){showToast('Камаш 1 савол илова кунед','error');return;}
+  DB.addTest({title, courseId, timeLimit, questions});
+  closeModal('modal-test');
+  document.getElementById('ts-title').value='';
+  document.getElementById('questions-list').innerHTML='';
+  qCount=0;
+  showToast(`Тест "${title}" илова шуд!`); renderAll();
+}
+
+function delTest(id){ DB.deleteTest(id); showToast('Нест шуд'); renderAll(); }
+
+// ===== SUBMISSIONS =====
+function renderSubmissions(){
+  const subs = DB.getSubmissions();
+  const pending = subs.filter(s=>s.status==='pending'||!s.status);
+  const badge = document.getElementById('sub-count-badge');
+  if(badge) badge.textContent = pending.length > 0 ? pending.length+' янги' : 'Ҳама тасдиқ';
+
+  const tb = document.getElementById('tb-submissions');
+  if(!subs.length){
+    tb.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-icon">📬</div><div class="empty-text">Ҳанӯз супориш нест</div></div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = subs.slice().reverse().map(s=>{
+    const isPending = !s.status || s.status==='pending';
+    const isApproved = s.status==='approved';
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:7px"><div class="avatar" style="width:26px;height:26px;font-size:10px">${initials(s.userName||'?')}</div><b>${s.userName||'—'}</b></div></td>
+      <td><b>${s.taskTitle||'—'}</b></td>
+      <td style="max-width:220px">
+        <div style="font-size:12px;line-height:1.5;color:var(--text);background:var(--surface);border-radius:7px;padding:6px 10px;max-height:60px;overflow-y:auto">
+          ${s.answer ? s.answer.replace(/</g,'&lt;').replace(/>/g,'&gt;') : '<span style="color:var(--muted)">—</span>'}
+        </div>
+      </td>
+      <td>
+        ${s.fileName ? `<button class="btn btn-outline btn-xs" onclick="downloadFile(${s.id})">⬇️ ${s.fileName}</button>` : '<span style="color:var(--muted);font-size:12px">Нест</span>'}
+      </td>
+      <td><span class="badge b-purple">+${s.points||0}</span></td>
+      <td><span class="badge ${isApproved?'b-green':isPending?'b-yellow':'b-red'}">${isApproved?'✓ Тасдиқ':isPending?'⏳ Интизор':'✗ Рад'}</span></td>
+      <td style="display:flex;gap:5px;flex-wrap:wrap">
+        ${isPending ? `
+          <button class="btn btn-green btn-xs" onclick="approveSubmission(${s.id})">✓ Тасдиқ</button>
+          <button class="btn btn-danger btn-xs" onclick="rejectSubmission(${s.id})">✗ Рад</button>
+        ` : `<button class="btn btn-outline btn-xs" onclick="resetSubmission(${s.id})">↩ Баргардон</button>`}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function approveSubmission(id){
+  const subs = DB.getSubmissions();
+  const sub = subs.find(s=>s.id===id);
+  if(sub) sub.status='approved';
+  localStorage.setItem('plt_subs', JSON.stringify(subs));
+  showToast('Супориш тасдиқ шуд! ✓');
+  renderSubmissions();
+}
+
+function rejectSubmission(id){
+  const subs = DB.getSubmissions();
+  const sub = subs.find(s=>s.id===id);
+  if(sub) sub.status='rejected';
+  localStorage.setItem('plt_subs', JSON.stringify(subs));
+  showToast('Рад карда шуд','error');
+  renderSubmissions();
+}
+
+function resetSubmission(id){
+  const subs = DB.getSubmissions();
+  const sub = subs.find(s=>s.id===id);
+  if(sub) sub.status='pending';
+  localStorage.setItem('plt_subs', JSON.stringify(subs));
+  showToast('Ҳолат баргардонда шуд');
+  renderSubmissions();
+}
+
+function downloadFile(id){
+  const subs = DB.getSubmissions();
+  const sub = subs.find(s=>s.id===id);
+  if(!sub||!sub.fileData) return;
+  const a = document.createElement('a');
+  a.href = sub.fileData;
+  a.download = sub.fileName || 'file';
+  a.click();
+}
+
+// ===== RENDER ALL =====
+function renderAll(){
+  renderStats(); renderCourses(); renderVideos(); renderUsers(); renderTasks(); renderTests(); renderSubmissions();
+}
+
+// Модалҳоро кушодан — курсҳоро пур кун
+document.getElementById('modal-video').addEventListener('click', function(e){
+  if(e.target===this) closeModal('modal-video');
+});
+['modal-course','modal-video','modal-user','modal-task','modal-test'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeModal(id);});
+});
+
+// Открытие модалей — заполнить селекты
+const origOpen = openModal;
+window.openModal = function(id){
+  origOpen(id);
+  if(id==='modal-video') fillCourseSelect('v-course');
+  if(id==='modal-task') fillCourseSelect('t-course');
+  if(id==='modal-test'){ fillCourseSelect('ts-course'); if(!qCount) addQuestion(); }
+};
+
+renderAll();
+</script>
+</body>
+</html>

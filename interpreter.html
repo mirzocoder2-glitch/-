@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Интерпретатор — CodeAcademy TJ</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.editor-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 0; height: calc(100vh - 57px); overflow: hidden; }
+.editor-panel { display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+.output-panel { display: flex; flex-direction: column; }
+.panel-header {
+  padding: 10px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.panel-title { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.lang-switch {
+  display: flex; gap: 3px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 3px;
+}
+.lang-btn {
+  padding: 4px 12px; border-radius: 6px; border: none;
+  background: transparent; color: var(--muted);
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  font-family: 'Space Mono', monospace; transition: all .16s;
+}
+.lang-btn.active { background: var(--accent); color: #fff; }
+
+.code-area {
+  flex: 1; width: 100%; resize: none; border: none; outline: none;
+  background: var(--bg); color: var(--text);
+  font-family: 'Space Mono', monospace; font-size: 13px;
+  line-height: 1.7; padding: 16px;
+  tab-size: 4;
+}
+
+.run-bar {
+  padding: 8px 14px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0; gap: 10px;
+}
+
+.run-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 20px; border-radius: 9px; border: none;
+  background: var(--green); color: #fff;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  font-family: 'Sora', sans-serif; transition: all .16s;
+}
+.run-btn:hover { background: #0ea472; transform: translateY(-1px); }
+.run-btn.loading { background: var(--muted); cursor: wait; }
+
+.clear-btn {
+  padding: 7px 14px; border-radius: 9px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--muted); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: 'Sora', sans-serif; transition: all .16s;
+}
+.clear-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+.shortcut-hint { font-size: 11px; color: var(--muted); }
+
+/* OUTPUT */
+.output-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+.out-tab {
+  padding: 9px 18px; font-size: 12px; font-weight: 600;
+  cursor: pointer; color: var(--muted);
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: all .16s; background: none; border-top: none;
+  border-left: none; border-right: none; font-family: 'Sora', sans-serif;
+}
+.out-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.out-content { flex: 1; overflow: hidden; position: relative; }
+
+/* CONSOLE */
+#console-out {
+  width: 100%; height: 100%;
+  background: #020408;
+  font-family: 'Space Mono', monospace; font-size: 13px;
+  color: #a8d8a8; padding: 14px; overflow-y: auto;
+  line-height: 1.7; box-sizing: border-box;
+}
+.con-line { margin-bottom: 2px; }
+.con-line.err { color: #f87171; }
+.con-line.warn { color: var(--yellow); }
+.con-line.info { color: #60a5fa; }
+.con-line.sys { color: var(--muted); font-style: italic; }
+.con-line.input-line { color: #c4b5fd; }
+
+/* HTML PREVIEW */
+#html-preview { width: 100%; height: 100%; border: none; background: #fff; display: none; }
+
+/* LINE NUMBERS */
+.editor-wrap { position: relative; flex: 1; display: flex; overflow: hidden; }
+.line-nums {
+  padding: 16px 10px 16px 14px;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  font-family: 'Space Mono', monospace;
+  font-size: 13px; line-height: 1.7;
+  color: var(--muted); text-align: right;
+  user-select: none; overflow: hidden;
+  min-width: 40px; flex-shrink: 0;
+}
+
+/* STATUS BAR */
+.status-bar {
+  padding: 4px 14px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--muted);
+  display: flex; gap: 16px; flex-shrink: 0;
+}
+.status-ok { color: var(--green); }
+.status-err { color: var(--danger); }
+
+/* EXAMPLES */
+.examples-btn {
+  padding: 6px 12px; border-radius: 8px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--muted); font-size: 12px; cursor: pointer;
+  font-family: 'Sora', sans-serif; transition: all .16s;
+}
+.examples-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.examples-drop {
+  position: absolute; top: 100%; right: 0; z-index: 50;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 11px; padding: 6px; min-width: 220px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.5);
+  display: none;
+}
+.examples-drop.open { display: block; }
+.ex-item {
+  padding: 8px 12px; border-radius: 7px; cursor: pointer;
+  font-size: 12px; transition: background .14s;
+  display: flex; align-items: center; gap: 8px;
+}
+.ex-item:hover { background: var(--surface); }
+
+.ex-wrap { position: relative; }
+
+/* INPUT AREA */
+.input-area {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; flex-shrink: 0;
+}
+.input-field {
+  flex: 1; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 7px; padding: 6px 10px;
+  color: var(--text); font-family: 'Space Mono', monospace; font-size: 12px;
+  outline: none;
+}
+.input-field:focus { border-color: var(--accent); }
+.input-send {
+  padding: 6px 12px; border-radius: 7px; border: none;
+  background: var(--accent); color: #fff; font-size: 12px;
+  font-weight: 700; cursor: pointer; font-family: 'Sora', sans-serif;
+}
+
+@media(max-width:860px){.editor-layout{grid-template-columns:1fr;height:auto;}.editor-panel{height:50vh;}.output-panel{height:50vh;}}
+</style>
+</head>
+<body>
+<script src="platform.js"></script>
+
+<!-- Pyodide барои Python -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+<div class="sidebar">
+  <div class="s-logo"><div class="s-logo-icon">&lt;/&gt;</div><div class="s-logo-text">CodeAcademy <small>Талаба</small></div></div>
+  <nav class="s-nav">
+    <a class="s-item" href="pupil.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Дашборд</a>
+    <a class="s-item" href="courses.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Курсҳо</a>
+    <a class="s-item" href="zadacha.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Вазифаҳо</a>
+    <a class="s-item" href="test.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Тестҳо</a>
+    <a class="s-item" href="reyting.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Рейтинг</a>
+    <a class="s-item active" href="interpreter.html"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> Интерпретатор</a>
+  </nav>
+  <div class="s-footer">
+    <div class="avatar" id="av-init">ТА</div>
+    <div class="av-info"><div class="av-name" id="av-name">Талаба</div><div class="av-role">Талаба</div></div>
+    <button class="logout-btn" onclick="Auth.logout()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+  </div>
+</div>
+
+<div class="main" style="display:flex;flex-direction:column;">
+  <div class="topbar" style="flex-shrink:0;">
+    <div class="tb-title">⚡ <span>Интерпретатор</span></div>
+    <div class="tb-right">
+      <div class="lang-switch">
+        <button class="lang-btn active" id="btn-python" onclick="setLang('python')">🐍 Python</button>
+        <button class="lang-btn" id="btn-html" onclick="setLang('html')">🌐 HTML</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="editor-layout">
+    <!-- EDITOR -->
+    <div class="editor-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span id="lang-icon">🐍</span>
+          <span id="lang-label">Python редактор</span>
+        </div>
+        <div class="ex-wrap">
+          <button class="examples-btn" onclick="toggleExamples()">📋 Намунаҳо ▾</button>
+          <div class="examples-drop" id="examples-drop"></div>
+        </div>
+      </div>
+
+      <div class="editor-wrap">
+        <div class="line-nums" id="line-nums">1</div>
+        <textarea class="code-area" id="code-editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
+          placeholder="Кодро ин ҷо нависед..."
+          onkeydown="handleKey(event)"
+          oninput="updateLineNums(); syncScroll()"
+          onscroll="syncScroll()"
+        ></textarea>
+      </div>
+
+      <div class="run-bar">
+        <button class="run-btn" id="run-btn" onclick="runCode()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Иҷро кун
+        </button>
+        <span class="shortcut-hint">Ctrl+Enter</span>
+        <div style="flex:1"></div>
+        <button class="clear-btn" onclick="clearEditor()">🗑 Тоза</button>
+      </div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="output-panel">
+      <div class="output-tabs">
+        <button class="out-tab active" id="tab-console" onclick="switchOut('console')">🖥️ Консол</button>
+        <button class="out-tab" id="tab-preview" onclick="switchOut('preview')">👁️ Пешнамо</button>
+      </div>
+      <div class="out-content">
+        <div id="console-out"></div>
+        <iframe id="html-preview" sandbox="allow-scripts"></iframe>
+      </div>
+      <div class="input-area" id="input-area" style="display:none">
+        <span style="color:var(--accent);font-family:'Space Mono',monospace;font-size:12px">▶</span>
+        <input class="input-field" id="user-input" placeholder="Ворид кунед..." onkeydown="if(event.key==='Enter') sendInput()">
+        <button class="input-send" onclick="sendInput()">↵</button>
+      </div>
+      <div class="status-bar">
+        <span id="status-text" class="con-line sys">Омода</span>
+        <span id="exec-time"></span>
+        <span id="py-status">🐍 Python бор мешавад...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const me = Auth.requirePupil();
+if(me){ document.getElementById('av-name').textContent=me.name; document.getElementById('av-init').textContent=initials(me.name); }
+
+// ===== STATE =====
+let currentLang = 'python';
+let pyodide = null;
+let pyReady = false;
+let inputResolve = null;
+
+// ===== PYODIDE LOAD =====
+async function loadPy(){
+  try {
+    pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/' });
+    pyReady = true;
+    document.getElementById('py-status').textContent = '🐍 Python ✓';
+    document.getElementById('py-status').style.color = 'var(--green)';
+    // Override print
+    pyodide.runPython(`
+import sys
+import io
+
+class ConsolePrint:
+    def write(self, text):
+        if text and text != '\\n':
+            import js
+            js.appendConsole(text, 'out')
+        elif text == '\\n':
+            import js
+            js.appendConsole('', 'newline')
+    def flush(self): pass
+
+class ConsoleInput:
+    def readline(self):
+        import js
+        return js.requestInput()
+
+sys.stdout = ConsolePrint()
+sys.stderr = ConsolePrint()
+    `);
+  } catch(e) {
+    document.getElementById('py-status').textContent = '🐍 Хато!';
+    document.getElementById('py-status').style.color = 'var(--danger)';
+  }
+}
+loadPy();
+
+// ===== LANG =====
+const pyExamples = [
+  { label: '👋 Салом Ҷаҳон', code: 'print("Салом, Ҷаҳон!")' },
+  { label: '🔢 Калкулятор', code: `a = 10
+b = 5
+print("Ҷамъ:", a + b)
+print("Тарҳ:", a - b)
+print("Зарб:", a * b)
+print("Тақсим:", a / b)` },
+  { label: '🔄 Ҳалқа for', code: `for i in range(1, 6):
+    print(f"Рақам: {i}")` },
+  { label: '📋 Рӯйхат', code: `mevalar = ["себ", "нок", "узум"]
+for meva in mevalar:
+    print("Мева:", meva)
+print("Ҷамъ:", len(mevalar))` },
+  { label: '🔧 Функсия', code: `def salom(nom):
+    return f"Салом, {nom}!"
+
+print(salom("Алӣ"))
+print(salom("Зарина"))` },
+  { label: '🎯 Шарт if/else', code: `son = 17
+if son > 0:
+    print("Мусбат")
+elif son < 0:
+    print("Манфӣ")
+else:
+    print("Сифр")` },
+  { label: '📦 Синф OOP', code: `class Донишҷӯ:
+    def __init__(self, ном, синф):
+        self.ном = ном
+        self.синф = синф
+    
+    def тааруф(self):
+        print(f"Ман {self.ном}, синфи {self.синф}")
+
+ali = Донишҷӯ("Алӣ", "10-А")
+ali.тааруф()` },
+  { label: '🔢 Ҷадвали зарб', code: `for i in range(1, 4):
+    for j in range(1, 4):
+        print(f"{i} x {j} = {i*j}")
+    print("---")` },
+];
+
+const htmlExamples = [
+  { label: '👋 Салом Ҷаҳон', code: `<!DOCTYPE html>
+<html>
+<body>
+  <h1>Салом, Ҷаҳон!</h1>
+  <p>Аввалин саҳифаи ман</p>
+</body>
+</html>` },
+  { label: '🎨 CSS Style', code: `<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { font-family: Arial; background: #1a1a2e; color: #fff; padding: 20px; }
+  h1 { color: #4f8ef7; }
+  .card { background: #16213e; border-radius: 12px; padding: 20px; margin: 10px 0; }
+</style>
+</head>
+<body>
+  <h1>🎨 Дизайни зебо</h1>
+  <div class="card">Карди аввал</div>
+  <div class="card">Карди дуввум</div>
+</body>
+</html>` },
+  { label: '📝 Форма', code: `<!DOCTYPE html>
+<html>
+<head><style>
+  body{font-family:Arial;padding:20px;background:#f5f5f5;}
+  input,button{padding:10px;margin:5px;border-radius:8px;border:1px solid #ddd;}
+  button{background:#4f8ef7;color:#fff;border:none;cursor:pointer;}
+  #out{margin-top:15px;padding:12px;background:#fff;border-radius:8px;}
+</style></head>
+<body>
+  <h2>Форма</h2>
+  <input id="nom" placeholder="Номи шумо">
+  <button onclick="salom()">Салом гӯ</button>
+  <div id="out"></div>
+  <script>
+    function salom(){
+      const nom = document.getElementById('nom').value;
+      document.getElementById('out').textContent = 'Салом, ' + nom + '!';
+    }
+  </script>
+</body>
+</html>` },
+  { label: '🎮 Ҳисоб кун', code: `<!DOCTYPE html>
+<html>
+<head><style>
+  body{font-family:Arial;display:flex;justify-content:center;padding:30px;background:#0a0a0f;}
+  .calc{background:#111;border-radius:16px;padding:24px;width:280px;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+  .display{background:#000;color:#4f8ef7;font-size:28px;font-family:monospace;padding:12px;border-radius:8px;text-align:right;margin-bottom:14px;}
+  .btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  button{padding:14px;border:none;border-radius:8px;font-size:16px;cursor:pointer;background:#1e1e2e;color:#fff;transition:.2s;}
+  button:hover{background:#2a2a3e;}
+  .op{background:#4f8ef7!important;}
+  .eq{background:#10b981!important;}
+</style></head>
+<body>
+<div class="calc">
+  <div class="display" id="d">0</div>
+  <div class="btns">
+    <button onclick="clr()">C</button><button onclick="ap('(')">(</button><button onclick="ap(')')">)</button><button class="op" onclick="ap('/')">÷</button>
+    <button onclick="ap('7')">7</button><button onclick="ap('8')">8</button><button onclick="ap('9')">9</button><button class="op" onclick="ap('*')">×</button>
+    <button onclick="ap('4')">4</button><button onclick="ap('5')">5</button><button onclick="ap('6')">6</button><button class="op" onclick="ap('-')">−</button>
+    <button onclick="ap('1')">1</button><button onclick="ap('2')">2</button><button onclick="ap('3')">3</button><button class="op" onclick="ap('+')">+</button>
+    <button onclick="ap('0')" style="grid-column:span 2">0</button><button onclick="ap('.')">.</button><button class="eq" onclick="calc()">=</button>
+  </div>
+</div>
+<script>
+  let s='';
+  const d=document.getElementById('d');
+  function ap(v){s+=v;d.textContent=s;}
+  function clr(){s='';d.textContent='0';}
+  function calc(){try{s=String(eval(s));d.textContent=s;}catch(e){d.textContent='Хато';s='';}}
+</script>
+</body></html>` },
+];
+
+function setLang(lang){
+  currentLang = lang;
+  document.getElementById('btn-python').classList.toggle('active', lang==='python');
+  document.getElementById('btn-html').classList.toggle('active', lang==='html');
+  document.getElementById('lang-icon').textContent = lang==='python'?'🐍':'🌐';
+  document.getElementById('lang-label').textContent = lang==='python'?'Python редактор':'HTML редактор';
+  document.getElementById('code-editor').value = '';
+  clearOutput();
+  updateLineNums();
+  buildExamples();
+  // HTML -> preview tab
+  if(lang==='html') switchOut('preview');
+  else switchOut('console');
+}
+
+function buildExamples(){
+  const list = currentLang==='python' ? pyExamples : htmlExamples;
+  const drop = document.getElementById('examples-drop');
+  drop.innerHTML = list.map((e,i)=>`<div class="ex-item" onclick="loadExample(${i})">${e.label}</div>`).join('');
+}
+
+function loadExample(i){
+  const list = currentLang==='python' ? pyExamples : htmlExamples;
+  document.getElementById('code-editor').value = list[i].code;
+  updateLineNums();
+  toggleExamples();
+  clearOutput();
+}
+
+function toggleExamples(){
+  document.getElementById('examples-drop').classList.toggle('open');
+}
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.ex-wrap')) document.getElementById('examples-drop').classList.remove('open');
+});
+
+// ===== EDITOR HELPERS =====
+function handleKey(e){
+  if(e.key==='Enter' && e.ctrlKey){ e.preventDefault(); runCode(); return; }
+  if(e.key==='Tab'){
+    e.preventDefault();
+    const ta = e.target;
+    const s = ta.selectionStart;
+    ta.value = ta.value.slice(0,s)+'    '+ta.value.slice(ta.selectionEnd);
+    ta.selectionStart = ta.selectionEnd = s+4;
+    updateLineNums();
+  }
+}
+
+function updateLineNums(){
+  const lines = document.getElementById('code-editor').value.split('\n').length;
+  document.getElementById('line-nums').textContent = Array.from({length:lines},(_,i)=>i+1).join('\n');
+}
+
+function syncScroll(){
+  const ed = document.getElementById('code-editor');
+  document.getElementById('line-nums').scrollTop = ed.scrollTop;
+}
+
+function clearEditor(){
+  document.getElementById('code-editor').value='';
+  updateLineNums();
+  clearOutput();
+}
+
+// ===== OUTPUT =====
+function clearOutput(){
+  document.getElementById('console-out').innerHTML='';
+  document.getElementById('html-preview').srcdoc='';
+  setStatus('Омода','');
+}
+
+function appendConsole(text, type='out'){
+  const con = document.getElementById('console-out');
+  if(type==='newline'){ con.innerHTML+='<br>'; con.scrollTop=con.scrollHeight; return; }
+  const cls = type==='err'?'err':type==='warn'?'warn':type==='info'?'info':type==='sys'?'sys':'';
+  const escaped = String(text).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  con.innerHTML += `<span class="con-line ${cls}">${escaped}</span>`;
+  con.scrollTop = con.scrollHeight;
+}
+
+// JS глобал функсия барои Pyodide
+window.appendConsole = appendConsole;
+window.requestInput = function(){ return ''; }; // placeholder
+
+function setStatus(msg, cls){
+  const el = document.getElementById('status-text');
+  el.textContent = msg;
+  el.className = 'con-line ' + (cls||'sys');
+}
+
+function switchOut(tab){
+  document.getElementById('tab-console').classList.toggle('active', tab==='console');
+  document.getElementById('tab-preview').classList.toggle('active', tab==='preview');
+  document.getElementById('console-out').style.display = tab==='console'?'block':'none';
+  document.getElementById('html-preview').style.display = tab==='preview'?'block':'none';
+}
+
+// ===== RUN =====
+async function runCode(){
+  const code = document.getElementById('code-editor').value.trim();
+  if(!code){ showToast('Кодро нависед!','error'); return; }
+
+  clearOutput();
+  const btn = document.getElementById('run-btn');
+  btn.classList.add('loading');
+  btn.textContent = '⏳ Иҷро...';
+  const t0 = Date.now();
+
+  if(currentLang==='html'){
+    runHTML(code);
+  } else {
+    await runPython(code);
+  }
+
+  const elapsed = Date.now()-t0;
+  document.getElementById('exec-time').textContent = `⏱ ${elapsed}мс`;
+  btn.classList.remove('loading');
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Иҷро кун';
+}
+
+function runHTML(code){
+  switchOut('preview');
+  document.getElementById('html-preview').srcdoc = code;
+  setStatus('HTML пешнамо нишон дода шуд','status-ok');
+  appendConsole('✓ HTML бор шуд', 'info');
+}
+
+async function runPython(code){
+  switchOut('console');
+  if(!pyReady){
+    appendConsole('⏳ Python ҳанӯз бор мешавад, лутфан интизор шавед...','warn');
+    setStatus('Python бор мешавад...','warn');
+    // wait
+    let waited = 0;
+    while(!pyReady && waited < 30000){ await new Promise(r=>setTimeout(r,500)); waited+=500; }
+    if(!pyReady){ appendConsole('✗ Python бор нашуд!','err'); return; }
+  }
+
+  appendConsole(`▶ Иҷро шуд`, 'sys');
+  setStatus('Иҷро мешавад...','info');
+
+  try {
+    // Redirect stdout/stderr
+    pyodide.globals.set('__output__', []);
+    
+    // Wrap code to capture print
+    const wrapped = `
+import sys, io, traceback
+
+_out = io.StringIO()
+_err = io.StringIO()
+_old_out = sys.stdout
+_old_err = sys.stderr
+
+class _Printer:
+    def __init__(self, tag):
+        self.tag = tag
+        self.buf = ''
+    def write(self, s):
+        import js
+        for ch in s:
+            if ch == '\\n':
+                if self.buf:
+                    js.appendConsole(self.buf, self.tag)
+                js.appendConsole('', 'newline')
+                self.buf = ''
+            else:
+                self.buf += ch
+    def flush(self):
+        if self.buf:
+            import js
+            js.appendConsole(self.buf, self.tag)
+            self.buf = ''
+
+sys.stdout = _Printer('out')
+sys.stderr = _Printer('err')
+
+try:
+${code.split('\n').map(l=>'    '+l).join('\n')}
+except Exception as _e:
+    import js
+    js.appendConsole(str(_e), 'err')
+finally:
+    sys.stdout.flush()
+    sys.stderr.flush()
+    sys.stdout = _old_out
+    sys.stderr = _old_err
+`;
+    await pyodide.runPythonAsync(wrapped);
+    setStatus('✓ Иҷро тамом шуд','status-ok');
+  } catch(e){
+    const msg = e.message || String(e);
+    appendConsole(msg, 'err');
+    setStatus('✗ Хато','status-err');
+  }
+}
+
+// ===== INIT =====
+buildExamples();
+updateLineNums();
+switchOut('console');
+
+// Default code
+document.getElementById('code-editor').value = `# Хуш омадед ба интерпретатори Python!
+# Ctrl+Enter ё тугмаи "Иҷро кун"-ро пахш кунед
+
+print("Салом, Ҷаҳон!")
+print("2 + 2 =", 2 + 2)
+
+for i in range(1, 6):
+    print(f"Рақами {i}: {'⭐' * i}")`;
+updateLineNums();
+</script>
+</body>
+</html>
